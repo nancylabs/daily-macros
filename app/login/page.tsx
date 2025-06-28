@@ -21,7 +21,10 @@ export default function LogIn() {
     const { error } = await signIn(email, password)
     
     if (error) {
-      setError(error.message)
+      const errorMessage = error && typeof error === 'object' && 'message' in error 
+        ? (error as { message: string }).message 
+        : 'An error occurred during sign in'
+      setError(errorMessage)
     } else {
       router.push('/dashboard')
     }
