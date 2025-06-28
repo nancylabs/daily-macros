@@ -82,9 +82,10 @@ export default function TestDBPage() {
 
         setStatus('All database tests passed! ✅')
 
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Database test error:', err)
-        setError(err.message)
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+        setError(errorMessage)
         setStatus('Database test failed ❌')
       }
     }

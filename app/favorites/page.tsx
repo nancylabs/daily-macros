@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useFoodLog } from '../../lib/FoodLogContext'
-import { Edit, Star, Trash2, Plus } from 'lucide-react'
+import { Edit } from 'lucide-react'
 import Link from 'next/link'
 import FadeIn from '../components/FadeIn'
 import ProtectedRoute from '../components/ProtectedRoute'

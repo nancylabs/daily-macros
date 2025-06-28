@@ -13,7 +13,7 @@ import { useEffect } from 'react'
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { log, updateEntry, goals, updateGoals, removeEntry, loading, addEntry } = useFoodLog()
+  const { log, updateEntry, goals, updateGoals, removeEntry, loading } = useFoodLog()
   const { signOut } = useAuth()
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [editingEntry, setEditingEntry] = useState({ name: '', calories: '', protein: '' })
@@ -22,8 +22,6 @@ export default function DashboardPage() {
     daily_calories_goal: goals.daily_calories_goal.toString(),
     daily_protein_goal: goals.daily_protein_goal.toString()
   })
-  const [tempGoals, setTempGoals] = useState(goals)
-  const [tempEntry, setTempEntry] = useState({ name: '', calories: 0, protein: 0 })
 
   // Debug logging for log state
   useEffect(() => {
@@ -39,11 +37,6 @@ export default function DashboardPage() {
   const calorieProgress = Math.min(100, (totalCalories / goals.daily_calories_goal) * 100)
   const proteinProgress = Math.min(100, (totalProtein / goals.daily_protein_goal) * 100)
 
-  // Update temp goals when goals change
-  useEffect(() => {
-    setTempGoals(goals)
-  }, [goals])
-
   const handleEdit = (index: number) => {
     const entry = log[index]
     setEditingEntry({
@@ -52,19 +45,6 @@ export default function DashboardPage() {
       protein: entry.protein.toString()
     })
     setEditingIndex(index)
-    setTempEntry({ name: entry.name, calories: entry.calories, protein: entry.protein })
-  }
-
-  const handleSaveEdit = () => {
-    if (editingIndex !== null) {
-      updateEntry(editingIndex, {
-        name: editingEntry.name,
-        calories: parseInt(editingEntry.calories),
-        protein: parseInt(editingEntry.protein)
-      })
-      setEditingIndex(null)
-      setEditingEntry({ name: '', calories: '', protein: '' })
-    }
   }
 
   const handleSaveGoals = async () => {
@@ -337,8 +317,8 @@ export default function DashboardPage() {
                           <label className="block text-sm font-medium text-primary mb-1">Food Name</label>
                           <input
                             type="text"
-                            value={tempEntry.name}
-                            onChange={(e) => setTempEntry({ ...tempEntry, name: e.target.value })}
+                            value={editingEntry.name}
+                            onChange={(e) => setEditingEntry({ ...editingEntry, name: e.target.value })}
                             className="input-secondary"
                             placeholder="Food name"
                           />
@@ -348,8 +328,8 @@ export default function DashboardPage() {
                             <label className="block text-sm font-medium text-primary mb-1">Calories</label>
                             <input
                               type="number"
-                              value={tempEntry.calories}
-                              onChange={(e) => setTempEntry({ ...tempEntry, calories: parseInt(e.target.value) || 0 })}
+                              value={editingEntry.calories}
+                              onChange={(e) => setEditingEntry({ ...editingEntry, calories: e.target.value })}
                               className="input-secondary"
                               placeholder="Calories"
                             />
@@ -358,8 +338,8 @@ export default function DashboardPage() {
                             <label className="block text-sm font-medium text-primary mb-1">Protein (grams)</label>
                             <input
                               type="number"
-                              value={tempEntry.protein}
-                              onChange={(e) => setTempEntry({ ...tempEntry, protein: parseInt(e.target.value) || 0 })}
+                              value={editingEntry.protein}
+                              onChange={(e) => setEditingEntry({ ...editingEntry, protein: e.target.value })}
                               className="input-secondary"
                               placeholder="Protein (g)"
                             />
@@ -369,7 +349,11 @@ export default function DashboardPage() {
                           <div className="flex gap-2">
                             <button
                               onClick={() => {
-                                updateEntry(index, tempEntry)
+                                updateEntry(index, {
+                                  name: editingEntry.name,
+                                  calories: parseInt(editingEntry.calories),
+                                  protein: parseInt(editingEntry.protein)
+                                })
                                 setEditingIndex(null)
                               }}
                               className="btn-save"

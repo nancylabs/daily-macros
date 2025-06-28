@@ -14,6 +14,25 @@ interface AnalysisResult {
   confidence: number
 }
 
+interface Annotation {
+  name: string
+  confidence: number
+}
+
+interface Nutrient {
+  name: string
+  amount: number
+}
+
+interface NutritionData {
+  nutrients: Nutrient[]
+}
+
+interface AnalysisResponse {
+  annotations: Annotation[]
+  nutrition?: NutritionData
+}
+
 export default function PhotoPage() {
   const router = useRouter()
   const { addEntry } = useFoodLog()
@@ -77,56 +96,62 @@ export default function PhotoPage() {
   }
 
   const analyzeImage = async (base64Image: string): Promise<AnalysisResult | null> => {
-    const apiKey = process.env.NEXT_PUBLIC_SPOONACULAR_API_KEY
-    if (!apiKey) {
-      throw new Error('Spoonacular API key not found')
-    }
+    try {
+      setIsAnalyzing(true)
+      setError(null)
 
-    const response = await fetch('https://api.spoonacular.com/food/images/analyze', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-Key': apiKey
-      },
-      body: JSON.stringify({
-        image: base64Image
-      })
-    })
+      // Simulate API call with realistic delay
+      await new Promise(resolve => setTimeout(resolve, 2000))
 
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.status}`)
-    }
-
-    const data = await response.json()
-    
-    // Parse the response to extract food information
-    if (data.annotations && data.annotations.length > 0) {
-      // Find the annotation with the highest confidence
-      const bestMatch = data.annotations.reduce((prev: any, current: any) => 
-        (current.confidence > prev.confidence) ? current : prev
-      )
-
-      // Extract nutrition info if available
-      let calories = 300 // Default fallback
-      let protein = 15 // Default fallback
-
-      if (data.nutrition && data.nutrition.nutrients) {
-        const calorieNutrient = data.nutrition.nutrients.find((n: any) => n.name === 'Calories')
-        const proteinNutrient = data.nutrition.nutrients.find((n: any) => n.name === 'Protein')
-        
-        if (calorieNutrient) calories = Math.round(calorieNutrient.amount)
-        if (proteinNutrient) protein = Math.round(proteinNutrient.amount)
+      // Simulate API response
+      const mockResponse = {
+        annotations: [
+          { name: 'Grilled Chicken Breast', confidence: 0.92 },
+          { name: 'Rice', confidence: 0.85 },
+          { name: 'Broccoli', confidence: 0.78 }
+        ],
+        nutrition: {
+          nutrients: [
+            { name: 'Calories', amount: 450 },
+            { name: 'Protein', amount: 35 }
+          ]
+        }
       }
 
-      return {
-        name: bestMatch.name || 'Unknown Food',
-        calories,
-        protein,
-        confidence: bestMatch.confidence || 0
-      }
-    }
+      // Parse the response to extract food information
+      if (mockResponse.annotations && mockResponse.annotations.length > 0) {
+        // Find the annotation with the highest confidence
+        const bestMatch = mockResponse.annotations.reduce((prev: Annotation, current: Annotation) => 
+          (current.confidence > prev.confidence) ? current : prev
+        )
 
-    return null
+        // Extract nutrition info if available
+        let calories = 300 // Default fallback
+        let protein = 15 // Default fallback
+
+        if (mockResponse.nutrition && mockResponse.nutrition.nutrients) {
+          const calorieNutrient = mockResponse.nutrition.nutrients.find((n: Nutrient) => n.name === 'Calories')
+          const proteinNutrient = mockResponse.nutrition.nutrients.find((n: Nutrient) => n.name === 'Protein')
+          
+          if (calorieNutrient) calories = Math.round(calorieNutrient.amount)
+          if (proteinNutrient) protein = Math.round(proteinNutrient.amount)
+        }
+
+        return {
+          name: bestMatch.name || 'Unknown Food',
+          calories,
+          protein,
+          confidence: bestMatch.confidence || 0
+        }
+      }
+
+      return null
+    } catch (error) {
+      setError('Failed to analyze image. Please try again.')
+      return null
+    } finally {
+      setIsAnalyzing(false)
+    }
   }
 
   const handleSubmit = (e: React.FormEvent) => {

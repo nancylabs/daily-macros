@@ -5,12 +5,18 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/AuthContext'
 import { useFoodLog } from '@/lib/FoodLogContext'
 
+interface TestResult {
+  test: string
+  status: string
+  details?: string
+}
+
 export default function TestFoodLogPage() {
   const { user } = useAuth()
   const { addEntry, log, loading } = useFoodLog()
   const [status, setStatus] = useState<string>('Ready to test...')
   const [error, setError] = useState<string>('')
-  const [testResults, setTestResults] = useState<any[]>([])
+  const [testResults, setTestResults] = useState<TestResult[]>([])
   const [isRunning, setIsRunning] = useState(false)
 
   const runTests = async () => {
@@ -354,9 +360,10 @@ export default function TestFoodLogPage() {
 
       setStatus('All food_log table tests completed successfully! ✅')
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Food log test error:', err)
-      setError(err.message)
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+      setError(errorMessage)
       setStatus('Food log table test failed ❌')
     } finally {
       setIsRunning(false)
@@ -375,7 +382,7 @@ export default function TestFoodLogPage() {
             <p>2. Open the SQL Editor</p>
             <p>3. Copy and paste the SQL from <code className="bg-gray-800 px-2 py-1 rounded">create-food-log-table.sql</code></p>
             <p>4. Run the SQL script</p>
-            <p>5. Click "Run Tests" below to verify everything works</p>
+            <p>5. Click &quot;Run Tests&quot; below to verify everything works</p>
           </div>
           
           <button
@@ -411,7 +418,7 @@ export default function TestFoodLogPage() {
         <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20 mb-6">
           <h2 className="text-lg font-semibold text-white mb-4">Test Results</h2>
           {testResults.length === 0 ? (
-            <p className="text-gray-300">No tests run yet. Click "Run Tests" to start verification.</p>
+            <p className="text-gray-300">No tests run yet. Click &quot;Run Tests&quot; to start verification.</p>
           ) : (
             <div className="space-y-3">
               {testResults.map((result, index) => (

@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react'
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react'
 import { useAuth } from './AuthContext'
 import { supabase } from './supabase'
 
@@ -59,19 +59,8 @@ export function FoodLogProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [currentDate, setCurrentDate] = useState(() => new Date().toDateString())
 
-  // Function to filter entries for a specific date
-  const filterEntriesForDate = (entries: Entry[], targetDate: Date) => {
-    const targetStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate())
-    const targetEnd = new Date(targetStart.getTime() + 24 * 60 * 60 * 1000)
-    
-    return entries.filter((entry: Entry) => {
-      const entryDate = new Date(entry.timestamp)
-      return entryDate >= targetStart && entryDate < targetEnd
-    })
-  }
-
   // Load user data from Supabase
-  const loadUserData = async () => {
+  const loadUserData = useCallback(async () => {
     if (!user) {
       setLog([])
       setFavorites([])
@@ -95,14 +84,19 @@ export function FoodLogProvider({ children }: { children: ReactNode }) {
       })
 
       // First try to load with date filtering (only regular entries)
-      let { data: logData, error: logError } = await supabase
+      const { data: logData, error: logError } = await supabase
         .from('food_log')
         .select('*')
         .eq('user_id', user.id)
-        .eq('is_favorite', false) // Only regular entries, not favorites
+        .eq('is_favorite', false)
         .gte('timestamp', todayStart.toISOString())
         .lt('timestamp', todayEnd.toISOString())
         .order('timestamp', { ascending: false })
+
+      if (logError) {
+        console.error('❌ Error loading food log:', logError)
+        throw logError
+      }
 
       // If no data found with date filtering, try loading all regular entries for debugging
       if (!logError && (!logData || logData.length === 0)) {
@@ -129,33 +123,56 @@ export function FoodLogProvider({ children }: { children: ReactNode }) {
           })
           
           console.log('📅 Today entries found:', todayEntries.length)
-          logData = todayEntries
+          const updatedLogData = todayEntries
           
           // If still no today entries, use all entries for debugging
           if (todayEntries.length === 0) {
             console.log('⚠️ No today entries found, using all entries for debugging')
-            logData = allData
+            const finalLogData = allData
+            console.log('📊 Raw Supabase response:', finalLogData)
+            console.log('📈 Number of entries returned:', finalLogData?.length || 0)
+
+            const formattedLog = finalLogData?.map(entry => ({
+              ...entry,
+              timestamp: new Date(entry.timestamp)
+            })) || []
+
+            console.log('✅ Setting log state with entries:', formattedLog)
+            setLog(formattedLog)
+          } else {
+            console.log('📊 Raw Supabase response:', updatedLogData)
+            console.log('📈 Number of entries returned:', updatedLogData?.length || 0)
+
+            const formattedLog = updatedLogData?.map(entry => ({
+              ...entry,
+              timestamp: new Date(entry.timestamp)
+            })) || []
+
+            console.log('✅ Setting log state with entries:', formattedLog)
+            setLog(formattedLog)
           }
         } else {
           console.log('📊 All regular entries for user:', allData)
+          const formattedLog = logData?.map(entry => ({
+            ...entry,
+            timestamp: new Date(entry.timestamp)
+          })) || []
+
+          console.log('✅ Setting log state with entries:', formattedLog)
+          setLog(formattedLog)
         }
+      } else {
+        console.log('📊 Raw Supabase response:', logData)
+        console.log('📈 Number of entries returned:', logData?.length || 0)
+
+        const formattedLog = logData?.map(entry => ({
+          ...entry,
+          timestamp: new Date(entry.timestamp)
+        })) || []
+
+        console.log('✅ Setting log state with entries:', formattedLog)
+        setLog(formattedLog)
       }
-
-      if (logError) {
-        console.error('❌ Error loading food log:', logError)
-        throw logError
-      }
-
-      console.log('📊 Raw Supabase response:', logData)
-      console.log('📈 Number of entries returned:', logData?.length || 0)
-
-      const formattedLog = logData?.map(entry => ({
-        ...entry,
-        timestamp: new Date(entry.timestamp)
-      })) || []
-
-      console.log('✅ Setting log state with entries:', formattedLog)
-      setLog(formattedLog)
 
       // Load favorites (only entries marked as favorites)
       console.log('⭐ Loading favorites for user:', user.id)
@@ -232,12 +249,12 @@ export function FoodLogProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user])
 
   // Load data when user changes
   useEffect(() => {
     loadUserData()
-  }, [user])
+  }, [user, loadUserData])
 
   // Check for date change and reload data if needed
   useEffect(() => {
@@ -269,7 +286,7 @@ export function FoodLogProvider({ children }: { children: ReactNode }) {
       clearInterval(interval)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [currentDate, user])
+  }, [currentDate, user, loadUserData])
 
   const addEntry = async (entry: Omit<Entry, 'timestamp' | 'id' | 'user_id'>) => {
     if (!user) {
