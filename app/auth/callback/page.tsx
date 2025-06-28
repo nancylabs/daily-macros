@@ -13,11 +13,16 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Get the access_token and refresh_token from URL params
+        console.log('Auth callback triggered with params:', Object.fromEntries(searchParams.entries()))
+        
+        // Get all relevant parameters
         const accessToken = searchParams.get('access_token')
         const refreshToken = searchParams.get('refresh_token')
+        const type = searchParams.get('type')
         const error = searchParams.get('error')
         const errorDescription = searchParams.get('error_description')
+
+        console.log('Parsed params:', { accessToken: !!accessToken, refreshToken: !!refreshToken, type, error, errorDescription })
 
         if (error) {
           console.error('Auth error:', error, errorDescription)
@@ -27,8 +32,33 @@ export default function AuthCallbackPage() {
           return
         }
 
-        if (accessToken && refreshToken) {
-          // Set the session with the tokens
+        // Handle different types of callbacks
+        if (type === 'signup' || type === 'recovery') {
+          // For signup confirmation, we might not have tokens yet
+          // Try to get the session from the current URL
+          const { data, error: sessionError } = await supabase.auth.getSession()
+          
+          if (sessionError) {
+            console.error('Session error:', sessionError)
+            setStatus('error')
+            setMessage('Failed to get session')
+            setTimeout(() => router.push('/auth'), 3000)
+            return
+          }
+
+          if (data.session) {
+            // Success - user is now authenticated
+            setStatus('success')
+            setMessage('Email confirmed! Redirecting to dashboard...')
+            setTimeout(() => router.push('/dashboard'), 2000)
+          } else {
+            // No session found, but this might be normal for email confirmation
+            setStatus('success')
+            setMessage('Email confirmed! You can now sign in.')
+            setTimeout(() => router.push('/auth'), 3000)
+          }
+        } else if (accessToken && refreshToken) {
+          // Handle token-based callback
           const { error: sessionError } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
@@ -47,10 +77,26 @@ export default function AuthCallbackPage() {
           setMessage('Email confirmed! Redirecting to dashboard...')
           setTimeout(() => router.push('/dashboard'), 2000)
         } else {
-          // No tokens found - might be a different type of callback
-          setStatus('error')
-          setMessage('Invalid callback parameters')
-          setTimeout(() => router.push('/auth'), 3000)
+          // Try to handle the callback using Supabase's built-in handler
+          const { data, error: callbackError } = await supabase.auth.getSession()
+          
+          if (callbackError) {
+            console.error('Callback error:', callbackError)
+            setStatus('error')
+            setMessage('Failed to process callback')
+            setTimeout(() => router.push('/auth'), 3000)
+            return
+          }
+
+          if (data.session) {
+            setStatus('success')
+            setMessage('Email confirmed! Redirecting to dashboard...')
+            setTimeout(() => router.push('/dashboard'), 2000)
+          } else {
+            setStatus('success')
+            setMessage('Email confirmed! You can now sign in.')
+            setTimeout(() => router.push('/auth'), 3000)
+          }
         }
       } catch (error) {
         console.error('Callback error:', error)
