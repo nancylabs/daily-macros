@@ -143,6 +143,7 @@ export default function FavoritesPage() {
               <ul className="space-y-3">
                 {favorites.map((favorite, index) => (
                   <li
+                    key={index}
                     className="card-hover relative"
                   >
                     {editingIndex === index ? (
