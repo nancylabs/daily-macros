@@ -1,15 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useFoodLog } from '../../lib/FoodLogContext'
 import { useAuth } from '../../lib/AuthContext'
-import { Edit } from 'lucide-react'
-import FadeIn from '../components/FadeIn'
+import { Edit, Trash2, Plus, Minus } from 'lucide-react'
 import ProtectedRoute from '../components/ProtectedRoute'
 import UserMenu from '../components/UserMenu'
 import { getFoodImage } from '@/lib/getFoodImage'
-import { useEffect } from 'react'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -181,48 +179,44 @@ export default function DashboardPage() {
 
           {/* Horizontal Progress Cards */}
           <div className="grid grid-cols-2 gap-4">
-            <FadeIn delay={0.1}>
-              <div 
-                className="rounded-2xl shadow-xl p-5 relative text-[#F5F5F5] backdrop-blur-sm overflow-hidden"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(193, 71, 224, 0.83), rgba(65, 30, 140, 0.8), rgba(28, 28, 48, 0.85))',
-                  border: '1px solid rgba(161, 0, 255, 0.3)',
-                  boxShadow: '0 0 20px rgba(161, 0, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-                }}
-              >
-                <h3 className="text-xl font-semibold text-[#F5F5F5] mb-3 text-center">Calories</h3>
-                <CircularProgress
-                  percentage={calorieProgress}
-                  value={caloriesRemaining.toString()}
-                  label="Remaining"
-                  subtitle={`${totalCalories}/${goals.daily_calories_goal} Spent`}
-                  color="bg-gradient-to-tr from-[#FF62AD] to-[#A100FF]"
-                  bgColor="#2A2E3B"
-                  textColor="text-[#F5F5F5]"
-                />
-              </div>
-            </FadeIn>
-            <FadeIn delay={0.2}>
-              <div 
-                className="rounded-2xl shadow-xl p-5 relative text-[#F5F5F5] backdrop-blur-sm overflow-hidden"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(112, 176, 236, 0.7), rgba(50, 60, 150, 0.6), rgba(28, 28, 48, 0.85))',
-                  border: '1px solid rgba(0, 194, 255, 0.3)',
-                  boxShadow: '0 0 20px rgba(0, 194, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-                }}
-              >
-                <h3 className="text-xl font-semibold text-[#F5F5F5] mb-3 text-center">Protein</h3>
-                <CircularProgress
-                  percentage={proteinProgress}
-                  value={`${proteinRemaining}g`}
-                  label="Needed"
-                  subtitle={`${totalProtein}/${goals.daily_protein_goal}g Achieved`}
-                  color="bg-gradient-to-tr from-[#00C2FF] to-[#A100FF]"
-                  bgColor="#2A2E3B"
-                  textColor="text-[#F5F5F5]"
-                />
-              </div>
-            </FadeIn>
+            <div 
+              className="rounded-2xl shadow-xl p-5 relative text-[#F5F5F5] backdrop-blur-sm overflow-hidden"
+              style={{
+                background: 'linear-gradient(135deg, rgba(193, 71, 224, 0.83), rgba(65, 30, 140, 0.8), rgba(28, 28, 48, 0.85))',
+                border: '1px solid rgba(161, 0, 255, 0.3)',
+                boxShadow: '0 0 20px rgba(161, 0, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+              }}
+            >
+              <h3 className="text-xl font-semibold text-[#F5F5F5] mb-3 text-center">Calories</h3>
+              <CircularProgress
+                percentage={calorieProgress}
+                value={caloriesRemaining.toString()}
+                label="Remaining"
+                subtitle={`${totalCalories}/${goals.daily_calories_goal} Spent`}
+                color="bg-gradient-to-tr from-[#FF62AD] to-[#A100FF]"
+                bgColor="#2A2E3B"
+                textColor="text-[#F5F5F5]"
+              />
+            </div>
+            <div 
+              className="rounded-2xl shadow-xl p-5 relative text-[#F5F5F5] backdrop-blur-sm overflow-hidden"
+              style={{
+                background: 'linear-gradient(135deg, rgba(112, 176, 236, 0.7), rgba(50, 60, 150, 0.6), rgba(28, 28, 48, 0.85))',
+                border: '1px solid rgba(0, 194, 255, 0.3)',
+                boxShadow: '0 0 20px rgba(0, 194, 255, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
+              }}
+            >
+              <h3 className="text-xl font-semibold text-[#F5F5F5] mb-3 text-center">Protein</h3>
+              <CircularProgress
+                percentage={proteinProgress}
+                value={`${proteinRemaining}g`}
+                label="Needed"
+                subtitle={`${totalProtein}/${goals.daily_protein_goal}g Achieved`}
+                color="bg-gradient-to-tr from-[#00C2FF] to-[#A100FF]"
+                bgColor="#2A2E3B"
+                textColor="text-[#F5F5F5]"
+              />
+            </div>
           </div>
         </div>
 
@@ -299,145 +293,144 @@ export default function DashboardPage() {
           ) : (
             <ul className="mt-4 space-y-3">
               {log.map((entry, index) => (
-                <FadeIn key={index} delay={index * 0.1}>
-                  <li 
-                    className="bg-[#1F1F2A] rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 group relative"
-                  >
-                    {editingIndex === index ? (
-                      <div className="space-y-3 p-4 pl-6">
-                        {/* Neon vertical gradient strip */}
-                        <div 
-                          className="absolute left-0 top-2 bottom-2 w-[2px] rounded-sm"
-                          style={{
-                            background: 'linear-gradient(to bottom, rgba(98, 0, 234, 0.5), rgba(186, 104, 200, 0.3))'
-                          }}
+                <li 
+                  key={index}
+                  className="bg-[#1F1F2A] rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 group relative"
+                >
+                  {editingIndex === index ? (
+                    <div className="space-y-3 p-4 pl-6">
+                      {/* Neon vertical gradient strip */}
+                      <div 
+                        className="absolute left-0 top-2 bottom-2 w-[2px] rounded-sm"
+                        style={{
+                          background: 'linear-gradient(to bottom, rgba(98, 0, 234, 0.5), rgba(186, 104, 200, 0.3))'
+                        }}
+                      />
+                      
+                      <div>
+                        <label className="block text-sm font-medium text-primary mb-1">Food Name</label>
+                        <input
+                          type="text"
+                          value={editingEntry.name}
+                          onChange={(e) => setEditingEntry({ ...editingEntry, name: e.target.value })}
+                          className="input-secondary"
+                          placeholder="Food name"
                         />
-                        
-                        <div>
-                          <label className="block text-sm font-medium text-primary mb-1">Food Name</label>
+                      </div>
+                      <div className="flex gap-2">
+                        <div className="flex-1">
+                          <label className="block text-sm font-medium text-primary mb-1">Calories</label>
                           <input
-                            type="text"
-                            value={editingEntry.name}
-                            onChange={(e) => setEditingEntry({ ...editingEntry, name: e.target.value })}
+                            type="number"
+                            value={editingEntry.calories}
+                            onChange={(e) => setEditingEntry({ ...editingEntry, calories: e.target.value })}
                             className="input-secondary"
-                            placeholder="Food name"
+                            placeholder="Calories"
                           />
                         </div>
-                        <div className="flex gap-2">
-                          <div className="flex-1">
-                            <label className="block text-sm font-medium text-primary mb-1">Calories</label>
-                            <input
-                              type="number"
-                              value={editingEntry.calories}
-                              onChange={(e) => setEditingEntry({ ...editingEntry, calories: e.target.value })}
-                              className="input-secondary"
-                              placeholder="Calories"
-                            />
-                          </div>
-                          <div className="flex-1">
-                            <label className="block text-sm font-medium text-primary mb-1">Protein (grams)</label>
-                            <input
-                              type="number"
-                              value={editingEntry.protein}
-                              onChange={(e) => setEditingEntry({ ...editingEntry, protein: e.target.value })}
-                              className="input-secondary"
-                              placeholder="Protein (g)"
-                            />
-                          </div>
+                        <div className="flex-1">
+                          <label className="block text-sm font-medium text-primary mb-1">Protein (grams)</label>
+                          <input
+                            type="number"
+                            value={editingEntry.protein}
+                            onChange={(e) => setEditingEntry({ ...editingEntry, protein: e.target.value })}
+                            className="input-secondary"
+                            placeholder="Protein (g)"
+                          />
                         </div>
-                        <div className="flex gap-2 justify-between items-center">
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => {
-                                updateEntry(index, {
-                                  name: editingEntry.name,
-                                  calories: parseInt(editingEntry.calories),
-                                  protein: parseInt(editingEntry.protein)
-                                })
-                                setEditingIndex(null)
-                              }}
-                              className="btn-save"
-                            >
-                              Save
-                            </button>
-                            <button
-                              onClick={() => setEditingIndex(null)}
-                              className="btn-secondary-sm"
-                            >
-                              Cancel
-                            </button>
-                          </div>
+                      </div>
+                      <div className="flex gap-2 justify-between items-center">
+                        <div className="flex gap-2">
                           <button
                             onClick={() => {
-                              removeEntry(index)
+                              updateEntry(index, {
+                                name: editingEntry.name,
+                                calories: parseInt(editingEntry.calories),
+                                protein: parseInt(editingEntry.protein)
+                              })
                               setEditingIndex(null)
                             }}
-                            className="text-sm text-[#FF62AD] hover:text-[#A100FF] underline transition-colors"
+                            className="btn-save"
                           >
-                            Delete
+                            Save
                           </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center space-x-4 p-4 pl-6 relative">
-                        {/* Neon vertical gradient strip */}
-                        <div 
-                          className="absolute left-0 top-2 bottom-2 w-[2px] rounded-sm"
-                          style={{
-                            background: 'linear-gradient(to bottom, rgba(98, 0, 234, 0.5), rgba(186, 104, 200, 0.3))'
-                          }}
-                        />
-                        
-                        {/* Checkmark Icon */}
-                        <div className="flex-shrink-0">
-                          <svg 
-                            className="w-6 h-6" 
-                            fill="none" 
-                            viewBox="0 0 24 24"
-                          >
-                            <defs>
-                              <linearGradient id="checkmarkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stopColor="#FF62AD" />
-                                <stop offset="100%" stopColor="#A100FF" />
-                              </linearGradient>
-                            </defs>
-                            <path 
-                              stroke="url(#checkmarkGradient)" 
-                              strokeLinecap="round" 
-                              strokeLinejoin="round" 
-                              strokeWidth={3} 
-                              d="M5 13l4 4L19 7" 
-                            />
-                          </svg>
-                        </div>
-                        
-                        {/* Food Details */}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-lg font-semibold text-[#F5F5F5] truncate">
-                            {entry.name}
-                          </h3>
-                          <p className="text-[#C9D6DF] mt-1">
-                            {entry.calories} calories · {entry.protein}g protein
-                          </p>
-                        </div>
-                        
-                        {/* Timestamp and Edit button aligned to the right */}
-                        <div className="flex-shrink-0 flex flex-col items-end gap-1">
-                          <span className="text-xs text-[#8891A8]">
-                            {formatTime(entry.timestamp)}
-                          </span>
                           <button
-                            onClick={() => handleEdit(index)}
-                            className="p-2 text-accent hover:text-[#A100FF] hover:bg-[#1A1C2C] rounded-lg transition-colors"
-                            title="Edit item"
+                            onClick={() => setEditingIndex(null)}
+                            className="btn-secondary-sm"
                           >
-                            <Edit className="w-4 h-4" />
+                            Cancel
                           </button>
                         </div>
+                        <button
+                          onClick={() => {
+                            removeEntry(index)
+                            setEditingIndex(null)
+                          }}
+                          className="text-sm text-[#FF62AD] hover:text-[#A100FF] underline transition-colors"
+                        >
+                          Delete
+                        </button>
                       </div>
-                    )}
-                  </li>
-                </FadeIn>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-4 p-4 pl-6 relative">
+                      {/* Neon vertical gradient strip */}
+                      <div 
+                        className="absolute left-0 top-2 bottom-2 w-[2px] rounded-sm"
+                        style={{
+                          background: 'linear-gradient(to bottom, rgba(98, 0, 234, 0.5), rgba(186, 104, 200, 0.3))'
+                        }}
+                      />
+                      
+                      {/* Checkmark Icon */}
+                      <div className="flex-shrink-0">
+                        <svg 
+                          className="w-6 h-6" 
+                          fill="none" 
+                          viewBox="0 0 24 24"
+                        >
+                          <defs>
+                            <linearGradient id="checkmarkGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#FF62AD" />
+                              <stop offset="100%" stopColor="#A100FF" />
+                            </linearGradient>
+                          </defs>
+                          <path 
+                            stroke="url(#checkmarkGradient)" 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            strokeWidth={3} 
+                            d="M5 13l4 4L19 7" 
+                          />
+                        </svg>
+                      </div>
+                      
+                      {/* Food Details */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-semibold text-[#F5F5F5] truncate">
+                          {entry.name}
+                        </h3>
+                        <p className="text-[#C9D6DF] mt-1">
+                          {entry.calories} calories · {entry.protein}g protein
+                        </p>
+                      </div>
+                      
+                      {/* Timestamp and Edit button aligned to the right */}
+                      <div className="flex-shrink-0 flex flex-col items-end gap-1">
+                        <span className="text-xs text-[#8891A8]">
+                          {formatTime(entry.timestamp)}
+                        </span>
+                        <button
+                          onClick={() => handleEdit(index)}
+                          className="p-2 text-accent hover:text-[#A100FF] hover:bg-[#1A1C2C] rounded-lg transition-colors"
+                          title="Edit item"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </li>
               ))}
             </ul>
           )}

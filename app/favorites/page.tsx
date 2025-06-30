@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useFoodLog } from '../../lib/FoodLogContext'
 import { Edit } from 'lucide-react'
 import Link from 'next/link'
-import FadeIn from '../components/FadeIn'
 import ProtectedRoute from '../components/ProtectedRoute'
 
 export default function FavoritesPage() {
@@ -143,135 +142,133 @@ export default function FavoritesPage() {
             ) : (
               <ul className="space-y-3">
                 {favorites.map((favorite, index) => (
-                  <FadeIn key={index} delay={index * 0.1}>
-                    <li
-                      className="card-hover relative"
-                    >
-                      {editingIndex === index ? (
-                        <div className="space-y-3 p-4 pl-6">
-                          {/* Neon vertical gradient strip */}
-                          <div 
-                            className="absolute left-0 top-2 bottom-2 w-[2px] rounded-sm"
-                            style={{
-                              background: 'linear-gradient(to bottom, rgba(98, 0, 234, 0.5), rgba(186, 104, 200, 0.3))'
-                            }}
+                  <li
+                    className="card-hover relative"
+                  >
+                    {editingIndex === index ? (
+                      <div className="space-y-3 p-4 pl-6">
+                        {/* Neon vertical gradient strip */}
+                        <div 
+                          className="absolute left-0 top-2 bottom-2 w-[2px] rounded-sm"
+                          style={{
+                            background: 'linear-gradient(to bottom, rgba(98, 0, 234, 0.5), rgba(186, 104, 200, 0.3))'
+                          }}
+                        />
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-primary mb-1">Food Name</label>
+                          <input
+                            type="text"
+                            value={editingFavorite.name}
+                            onChange={(e) => setEditingFavorite(prev => ({ ...prev, name: e.target.value }))}
+                            className="input-secondary"
+                            placeholder="Food name"
                           />
-                          
-                          <div>
-                            <label className="block text-sm font-medium text-primary mb-1">Food Name</label>
+                        </div>
+                        <div className="flex gap-2">
+                          <div className="flex-1">
+                            <label className="block text-sm font-medium text-primary mb-1">Calories</label>
                             <input
-                              type="text"
-                              value={editingFavorite.name}
-                              onChange={(e) => setEditingFavorite(prev => ({ ...prev, name: e.target.value }))}
+                              type="number"
+                              value={editingFavorite.calories}
+                              onChange={(e) => setEditingFavorite(prev => ({ ...prev, calories: e.target.value }))}
                               className="input-secondary"
-                              placeholder="Food name"
+                              placeholder="Calories"
                             />
                           </div>
+                          <div className="flex-1">
+                            <label className="block text-sm font-medium text-primary mb-1">Protein (grams)</label>
+                            <input
+                              type="number"
+                              value={editingFavorite.protein}
+                              onChange={(e) => setEditingFavorite(prev => ({ ...prev, protein: e.target.value }))}
+                              className="input-secondary"
+                              placeholder="Protein (g)"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex gap-2 justify-between items-center">
                           <div className="flex gap-2">
-                            <div className="flex-1">
-                              <label className="block text-sm font-medium text-primary mb-1">Calories</label>
-                              <input
-                                type="number"
-                                value={editingFavorite.calories}
-                                onChange={(e) => setEditingFavorite(prev => ({ ...prev, calories: e.target.value }))}
-                                className="input-secondary"
-                                placeholder="Calories"
-                              />
-                            </div>
-                            <div className="flex-1">
-                              <label className="block text-sm font-medium text-primary mb-1">Protein (grams)</label>
-                              <input
-                                type="number"
-                                value={editingFavorite.protein}
-                                onChange={(e) => setEditingFavorite(prev => ({ ...prev, protein: e.target.value }))}
-                                className="input-secondary"
-                                placeholder="Protein (g)"
-                              />
-                            </div>
-                          </div>
-                          <div className="flex gap-2 justify-between items-center">
-                            <div className="flex gap-2">
-                              <button
-                                onClick={handleSaveEdit}
-                                className="btn-save"
-                              >
-                                Save
-                              </button>
-                              <button
-                                onClick={() => setEditingIndex(null)}
-                                className="btn-secondary-sm"
-                              >
-                                Cancel
-                              </button>
-                            </div>
                             <button
-                              onClick={() => handleRemoveFavorite(index)}
-                              className="text-sm text-[#FF62AD] hover:text-[#A100FF] underline transition-colors"
+                              onClick={handleSaveEdit}
+                              className="btn-save"
                             >
-                              Delete
+                              Save
+                            </button>
+                            <button
+                              onClick={() => setEditingIndex(null)}
+                              className="btn-secondary-sm"
+                            >
+                              Cancel
                             </button>
                           </div>
+                          <button
+                            onClick={() => handleRemoveFavorite(index)}
+                            className="text-sm text-[#FF62AD] hover:text-[#A100FF] underline transition-colors"
+                          >
+                            Delete
+                          </button>
                         </div>
-                      ) : (
+                      </div>
+                    ) : (
+                      <div 
+                        className="flex items-center space-x-4 p-4 pl-6 relative cursor-pointer"
+                        onClick={() => handleLogFavorite(favorite)}
+                      >
+                        {/* Neon vertical gradient strip */}
                         <div 
-                          className="flex items-center space-x-4 p-4 pl-6 relative cursor-pointer"
-                          onClick={() => handleLogFavorite(favorite)}
-                        >
-                          {/* Neon vertical gradient strip */}
-                          <div 
-                            className="absolute left-0 top-2 bottom-2 w-[2px] rounded-sm"
-                            style={{
-                              background: 'linear-gradient(to bottom, rgba(98, 0, 234, 0.5), rgba(186, 104, 200, 0.3))'
-                            }}
-                          />
-                          
-                          {/* Plus Icon */}
-                          <div className="flex-shrink-0">
-                            <svg 
-                              className="w-7 h-7" 
-                              fill="none" 
-                              viewBox="0 0 24 24"
-                            >
-                              <defs>
-                                <linearGradient id="favoritePlusGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                  <stop offset="0%" stopColor="#FF62AD" />
-                                  <stop offset="100%" stopColor="#A100FF" />
-                                </linearGradient>
-                              </defs>
-                              <path 
-                                stroke="url(#favoritePlusGradient)" 
-                                strokeLinecap="round" 
-                                strokeLinejoin="round" 
-                                strokeWidth={3} 
-                                d="M12 5v14M5 12h14" 
-                              />
-                            </svg>
-                          </div>
-                          
-                          {/* Food Details */}
-                          <div className="flex-1 min-w-0">
-                            <h3 className="text-lg font-semibold text-primary truncate">
-                              {favorite.name}
-                            </h3>
-                            <p className="text-secondary mt-1">
-                              {favorite.calories} calories · {favorite.protein}g protein
-                            </p>
-                          </div>
-                          
-                          {/* Action Buttons - stacked vertically */}
-                          <div className="flex-shrink-0 flex flex-col items-end gap-1">
-                            <button
-                              onClick={() => handleEdit(index)}
-                              className="p-2 text-accent hover:text-[#A100FF] hover:bg-[#1A1C2C] rounded-lg transition-colors"
-                              title="Edit favorite"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                          </div>
+                          className="absolute left-0 top-2 bottom-2 w-[2px] rounded-sm"
+                          style={{
+                            background: 'linear-gradient(to bottom, rgba(98, 0, 234, 0.5), rgba(186, 104, 200, 0.3))'
+                          }}
+                        />
+                        
+                        {/* Plus Icon */}
+                        <div className="flex-shrink-0">
+                          <svg 
+                            className="w-7 h-7" 
+                            fill="none" 
+                            viewBox="0 0 24 24"
+                          >
+                            <defs>
+                              <linearGradient id="favoritePlusGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stopColor="#FF62AD" />
+                                <stop offset="100%" stopColor="#A100FF" />
+                              </linearGradient>
+                            </defs>
+                            <path 
+                              stroke="url(#favoritePlusGradient)" 
+                              strokeLinecap="round" 
+                              strokeLinejoin="round" 
+                              strokeWidth={3} 
+                              d="M12 5v14M5 12h14" 
+                            />
+                          </svg>
                         </div>
-                      )}
-                    </li>
-                  </FadeIn>
+                        
+                        {/* Food Details */}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-lg font-semibold text-primary truncate">
+                            {favorite.name}
+                          </h3>
+                          <p className="text-secondary mt-1">
+                            {favorite.calories} calories · {favorite.protein}g protein
+                          </p>
+                        </div>
+                        
+                        {/* Action Buttons - stacked vertically */}
+                        <div className="flex-shrink-0 flex flex-col items-end gap-1">
+                          <button
+                            onClick={() => handleEdit(index)}
+                            className="p-2 text-accent hover:text-[#A100FF] hover:bg-[#1A1C2C] rounded-lg transition-colors"
+                            title="Edit favorite"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </li>
                 ))}
               </ul>
             )}
