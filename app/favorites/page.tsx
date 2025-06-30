@@ -213,7 +213,10 @@ export default function FavoritesPage() {
                           </div>
                         </div>
                       ) : (
-                        <div className="flex items-center space-x-4 p-4 pl-6 relative">
+                        <div 
+                          className="flex items-center space-x-4 p-4 pl-6 relative cursor-pointer"
+                          onClick={() => handleLogFavorite(favorite)}
+                        >
                           {/* Neon vertical gradient strip */}
                           <div 
                             className="absolute left-0 top-2 bottom-2 w-[2px] rounded-sm"

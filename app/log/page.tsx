@@ -48,10 +48,16 @@ export default function LogPage() {
   )
 
   const handleQuickAdd = async (food: { name: string; calories: number; protein: number }) => {
-    await logFavorite(food)
-    // Force refresh of frequent foods after adding an entry
-    setRefreshKey(prev => prev + 1)
-    router.push('/dashboard')
+    console.log('🚀 Quick add triggered for:', food)
+    try {
+      await logFavorite(food)
+      console.log('✅ Quick add successful, refreshing frequent foods')
+      // Force refresh of frequent foods after adding an entry
+      setRefreshKey(prev => prev + 1)
+      router.push('/dashboard')
+    } catch (error) {
+      console.error('❌ Quick add failed:', error)
+    }
   }
 
   return (

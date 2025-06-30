@@ -261,8 +261,11 @@ export function FoodLogProvider({ children }: { children: ReactNode }) {
     const checkDateChange = () => {
       const today = new Date().toDateString()
       if (today !== currentDate) {
-        console.log('Date changed, reloading data')
+        console.log('Date changed, clearing log for new day')
         setCurrentDate(today)
+        // Clear the log for the new day
+        setLog([])
+        // Reload user data to get fresh data for the new day
         loadUserData()
       }
     }
@@ -475,7 +478,9 @@ export function FoodLogProvider({ children }: { children: ReactNode }) {
   }
 
   const logFavorite = async (entry: Omit<Entry, 'timestamp' | 'id' | 'user_id'>) => {
+    console.log('📝 logFavorite called with:', entry)
     await addEntry(entry)
+    console.log('📝 logFavorite completed')
   }
 
   const updateGoals = async (newGoals: Omit<Goals, 'user_id' | 'id' | 'created_at' | 'updated_at'>) => {
