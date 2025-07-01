@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useFoodLog } from '../../lib/FoodLogContext'
 import { Search, Edit3, Camera } from 'lucide-react'
 import ProtectedRoute from '../components/ProtectedRoute'
+import AIFoodInput from '../components/AIFoodInput'
 
 export default function LogPage() {
   const router = useRouter()
@@ -13,6 +14,7 @@ export default function LogPage() {
   const [frequentFoods, setFrequentFoods] = useState<Array<{ name: string; calories: number; protein: number; timestamp: Date; count: number }>>([])
   const [loadingFrequentFoods, setLoadingFrequentFoods] = useState(true)
   const [refreshKey, setRefreshKey] = useState(0) // Add refresh key to force recalculation
+  const [aiPrefill, setAIPrefill] = useState<{ name: string; calories: number; protein: number; summary: string } | null>(null)
   
   // Load frequent foods on component mount and when log changes
   useEffect(() => {
@@ -67,6 +69,35 @@ export default function LogPage() {
           <div className="bg-[#1A1C2C] rounded-xl p-6 -mx-4 sm:-mx-6">
             <h1 className="text-2xl font-bold text-[#F5F5F5]">Log Food</h1>
           </div>
+
+          {/* AI Food Input Floating UI */}
+          <AIFoodInput
+            onPrefill={(item, summary) => {
+              if (item) {
+                setAIPrefill({
+                  name: summary ? `${summary}: ${item.name}` : item.name,
+                  calories: item.estimated_calories,
+                  protein: item.estimated_protein,
+                  summary: summary || ''
+                })
+              } else {
+                setAIPrefill(null)
+              }
+            }}
+          />
+
+          {/* If AI prefill is available, show a button to go to manual entry with prefilled values */}
+          {aiPrefill && (
+            <div className="mb-6 flex flex-col items-start gap-2">
+              <span className="text-green-300 text-sm">AI suggestion ready! You can edit before logging.</span>
+              <a
+                href={`/log/manual?name=${encodeURIComponent(aiPrefill.name)}&calories=${aiPrefill.calories}&protein=${aiPrefill.protein}`}
+                className="btn-save px-5 py-2 rounded bg-green-600 text-white font-semibold hover:bg-green-700 transition"
+              >
+                Log This Food
+              </a>
+            </div>
+          )}
 
           {/* Action buttons */}
           <div className="flex gap-4">

@@ -136,7 +136,7 @@ export default function FavoritesPage() {
           )}
 
           {/* Favorites List */}
-          <section>
+          <section className="pb-24">
             {favorites.length === 0 ? (
               <p className="text-secondary text-center py-8">No favorites yet. Add some common foods to log them quickly!</p>
             ) : (

@@ -3,6 +3,8 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react'
 import { useAuth } from './AuthContext'
 import { supabase } from './supabase'
+import { startOfDay, endOfDay } from 'date-fns'
+import { zonedTimeToUtc } from 'date-fns-tz'
 
 type Entry = {
   id?: string
@@ -72,15 +74,21 @@ export function FoodLogProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true)
 
-      // Load today's food log (only regular entries, not favorites)
-      const today = new Date()
-      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
-      const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000)
+      // Use Pacific Time for daily boundaries
+      const timeZone = 'America/Los_Angeles'
+      const now = new Date()
+      const year = now.getFullYear()
+      const month = (now.getMonth() + 1).toString().padStart(2, '0')
+      const day = now.getDate().toString().padStart(2, '0')
+      const startOfDayPT = `${year}-${month}-${day}T00:00:00`
+      const endOfDayPT = `${year}-${month}-${day}T23:59:59.999`
+      const todayStartUTC = zonedTimeToUtc(startOfDayPT, timeZone).toISOString()
+      const todayEndUTC = zonedTimeToUtc(endOfDayPT, timeZone).toISOString()
 
       console.log('🔍 Loading food log for user:', user.id)
-      console.log('📅 Date range:', { 
-        todayStart: todayStart.toISOString(), 
-        todayEnd: todayEnd.toISOString() 
+      console.log('📅 Date range (Pacific Time boundaries, UTC for DB):', {
+        todayStartUTC,
+        todayEndUTC
       })
 
       // First try to load with date filtering (only regular entries)
@@ -89,8 +97,8 @@ export function FoodLogProvider({ children }: { children: ReactNode }) {
         .select('*')
         .eq('user_id', user.id)
         .eq('is_favorite', false)
-        .gte('timestamp', todayStart.toISOString())
-        .lt('timestamp', todayEnd.toISOString())
+        .gte('timestamp', todayStartUTC)
+        .lt('timestamp', todayEndUTC)
         .order('timestamp', { ascending: false })
 
       if (logError) {
@@ -116,7 +124,7 @@ export function FoodLogProvider({ children }: { children: ReactNode }) {
           const todayEntries = allData.filter(entry => {
             const entryDate = new Date(entry.timestamp)
             const entryDateString = entryDate.toDateString()
-            const todayString = today.toDateString()
+            const todayString = now.toDateString()
             const isToday = entryDateString === todayString
             console.log(`Entry: ${entry.name}, Date: ${entryDateString}, Today: ${todayString}, IsToday: ${isToday}`)
             return isToday
@@ -319,11 +327,9 @@ export function FoodLogProvider({ children }: { children: ReactNode }) {
         timestamp: new Date(data.timestamp)
       }
 
-      console.log('🔄 Updating log state. Previous entries:', log.length)
       setLog(prev => {
         const newLog = [formattedEntry, ...prev]
-        console.log('📝 New log state will have entries:', newLog.length)
-        console.log('📋 New log entries:', newLog.map(e => `${e.name} (${e.calories} cal)`))
+        console.log('📝 New log state after addEntry:', newLog)
         return newLog
       })
     } catch (error) {
@@ -479,8 +485,12 @@ export function FoodLogProvider({ children }: { children: ReactNode }) {
 
   const logFavorite = async (entry: Omit<Entry, 'timestamp' | 'id' | 'user_id'>) => {
     console.log('📝 logFavorite called with:', entry)
-    await addEntry(entry)
-    console.log('📝 logFavorite completed')
+    try {
+      await addEntry(entry)
+      console.log('📝 logFavorite completed')
+    } catch (error) {
+      console.error('📝 logFavorite error:', error)
+    }
   }
 
   const updateGoals = async (newGoals: Omit<Goals, 'user_id' | 'id' | 'created_at' | 'updated_at'>) => {
