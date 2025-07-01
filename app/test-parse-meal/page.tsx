@@ -33,7 +33,7 @@ export default function TestParseMealPage() {
 
   return (
     <main className="max-w-xl mx-auto p-8 space-y-6">
-      <h1 className="text-2xl font-bold mb-4">Test AI Food Parse API</h1>
+      <h1 className="text-2xl font-bold mb-4 text-white">Test AI Food Parse API</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <textarea
           className="w-full p-3 rounded border border-gray-300 bg-gray-900 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"

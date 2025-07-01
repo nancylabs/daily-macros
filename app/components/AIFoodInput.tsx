@@ -68,7 +68,17 @@ export default function AIFoodInput({ onPrefill }: { onPrefill: (item: FoodItem 
           const totalProtein = data.reduce((sum, f) => sum + (f.estimated_protein || 0), 0)
           const summaryLine = `We found ${data.length} item${data.length > 1 ? "s" : ""} totaling ~${totalCals} calories and ${totalProtein}g of protein`
           setSummary(summaryLine)
-          onPrefill(data[0], summaryLine)
+          
+          // Create a combined food item for prefill
+          const combinedItem: FoodItem = {
+            name: data.length === 1 ? data[0].name : `Combined meal (${data.length} items)`,
+            estimated_calories: totalCals,
+            estimated_protein: totalProtein,
+            assumed_weight_g: data.reduce((sum, f) => sum + (f.assumed_weight_g || 0), 0),
+            notes: data.length === 1 ? data[0].notes : `Combined from ${data.length} food items`
+          }
+          
+          onPrefill(combinedItem, summaryLine)
         } else {
           setSummary("")
           onPrefill(null, "")
