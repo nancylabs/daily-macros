@@ -3,8 +3,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react'
 import { useAuth } from './AuthContext'
 import { supabase } from './supabase'
-import { startOfDay, endOfDay } from 'date-fns'
-import { zonedTimeToUtc } from 'date-fns-tz'
 
 type Entry = {
   id?: string
@@ -74,21 +72,15 @@ export function FoodLogProvider({ children }: { children: ReactNode }) {
     try {
       setLoading(true)
 
-      // Use Pacific Time for daily boundaries
-      const timeZone = 'America/Los_Angeles'
-      const now = new Date()
-      const year = now.getFullYear()
-      const month = (now.getMonth() + 1).toString().padStart(2, '0')
-      const day = now.getDate().toString().padStart(2, '0')
-      const startOfDayPT = `${year}-${month}-${day}T00:00:00`
-      const endOfDayPT = `${year}-${month}-${day}T23:59:59.999`
-      const todayStartUTC = zonedTimeToUtc(startOfDayPT, timeZone).toISOString()
-      const todayEndUTC = zonedTimeToUtc(endOfDayPT, timeZone).toISOString()
+      // Load today's food log (only regular entries, not favorites)
+      const today = new Date()
+      const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+      const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000)
 
       console.log('🔍 Loading food log for user:', user.id)
-      console.log('📅 Date range (Pacific Time boundaries, UTC for DB):', {
-        todayStartUTC,
-        todayEndUTC
+      console.log('📅 Date range:', { 
+        todayStart: todayStart.toISOString(), 
+        todayEnd: todayEnd.toISOString() 
       })
 
       // First try to load with date filtering (only regular entries)
@@ -97,8 +89,8 @@ export function FoodLogProvider({ children }: { children: ReactNode }) {
         .select('*')
         .eq('user_id', user.id)
         .eq('is_favorite', false)
-        .gte('timestamp', todayStartUTC)
-        .lt('timestamp', todayEndUTC)
+        .gte('timestamp', todayStart.toISOString())
+        .lt('timestamp', todayEnd.toISOString())
         .order('timestamp', { ascending: false })
 
       if (logError) {
@@ -124,7 +116,7 @@ export function FoodLogProvider({ children }: { children: ReactNode }) {
           const todayEntries = allData.filter(entry => {
             const entryDate = new Date(entry.timestamp)
             const entryDateString = entryDate.toDateString()
-            const todayString = now.toDateString()
+            const todayString = today.toDateString()
             const isToday = entryDateString === todayString
             console.log(`Entry: ${entry.name}, Date: ${entryDateString}, Today: ${todayString}, IsToday: ${isToday}`)
             return isToday
