@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
       if (data.choices && data.choices[0]?.message?.content) {
         console.log("Raw content from OpenAI:", data.choices[0].message.content)
         
-        let content = data.choices[0].message.content.trim()
+        const content = data.choices[0].message.content.trim()
         
         // Try to parse as JSON array or object
         let parsed
