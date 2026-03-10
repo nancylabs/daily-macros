@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useFoodLog } from '../../../lib/FoodLogContext'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import ProtectedRoute from '../../components/ProtectedRoute'
 
 export default function ManualEntryPage() {
   const router = useRouter()
@@ -47,7 +46,7 @@ export default function ManualEntryPage() {
   }
 
   return (
-    <ProtectedRoute>
+    <>
       <main className="p-4 sm:p-6 max-w-xl mx-auto space-y-6 pb-20">
         {/* Header */}
         <div className="flex items-center space-x-4">
@@ -112,6 +111,6 @@ export default function ManualEntryPage() {
           </form>
         </div>
       </main>
-    </ProtectedRoute>
+    </>
   )
 }

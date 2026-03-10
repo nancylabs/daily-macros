@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useFoodLog } from '../../lib/FoodLogContext'
 import { Edit } from 'lucide-react'
 import Link from 'next/link'
-import ProtectedRoute from '../components/ProtectedRoute'
 
 export default function FavoritesPage() {
   const router = useRouter()
@@ -74,7 +73,7 @@ export default function FavoritesPage() {
   }
 
   return (
-    <ProtectedRoute>
+    <>
       <main className="bg-[#0E0F1A] min-h-screen">
         <div className="section-container">
           {/* Dark Header Section - matching Dashboard Summary */}
@@ -276,6 +275,6 @@ export default function FavoritesPage() {
           </section>
         </div>
       </main>
-    </ProtectedRoute>
+    </>
   )
 } 

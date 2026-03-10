@@ -3,16 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useFoodLog } from '../../lib/FoodLogContext'
-import { useAuth } from '../../lib/AuthContext'
-import { Edit, Trash2, Plus, Minus } from 'lucide-react'
-import ProtectedRoute from '../components/ProtectedRoute'
-import UserMenu from '../components/UserMenu'
-import { getFoodImage } from '@/lib/getFoodImage'
+import { Edit } from 'lucide-react'
 
 export default function DashboardPage() {
   const router = useRouter()
   const { log, updateEntry, goals, updateGoals, removeEntry, loading } = useFoodLog()
-  const { signOut } = useAuth()
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [editingEntry, setEditingEntry] = useState({ name: '', calories: '', protein: '' })
   const [showGoalEditor, setShowGoalEditor] = useState(false)
@@ -53,10 +48,6 @@ export default function DashboardPage() {
     setShowGoalEditor(false)
   }
 
-  const handleLogout = async () => {
-    await signOut()
-    router.push('/login')
-  }
 
   const formatTime = (date: Date) => {
     return new Intl.DateTimeFormat('en-US', { 
@@ -146,21 +137,19 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <ProtectedRoute>
-        <main className="p-4 sm:p-6 max-w-xl mx-auto space-y-6 pb-20">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6366F1] mx-auto mb-4"></div>
-              <p className="text-[#F5F5F5]">Loading your data...</p>
-            </div>
+      <main className="p-4 sm:p-6 max-w-xl mx-auto space-y-6 pb-20">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6366F1] mx-auto mb-4"></div>
+            <p className="text-[#F5F5F5]">Loading your data...</p>
           </div>
-        </main>
-      </ProtectedRoute>
+        </div>
+      </main>
     )
   }
 
   return (
-    <ProtectedRoute>
+    <>
       <main className="p-4 sm:p-6 max-w-xl mx-auto space-y-6 pb-20">
         {/* Dark Summary Section */}
         <div className="bg-[#1A1C2C] rounded-xl p-6 -mx-4 sm:-mx-6">
@@ -173,7 +162,7 @@ export default function DashboardPage() {
               >
                 Edit Goals
               </button>
-              <UserMenu />
+              <span className="text-xs bg-[#A100FF]/20 border border-[#A100FF]/30 text-[#A100FF] px-2 py-1 rounded-full">Demo</span>
             </div>
           </div>
 
@@ -436,7 +425,7 @@ export default function DashboardPage() {
           )}
         </section>
       </main>
-    </ProtectedRoute>
+    </>
   )
 }
   

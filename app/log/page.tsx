@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useFoodLog } from '../../lib/FoodLogContext'
 import { Search, Edit3, Camera } from 'lucide-react'
-import ProtectedRoute from '../components/ProtectedRoute'
 
 export default function LogPage() {
   const router = useRouter()
@@ -60,7 +59,7 @@ export default function LogPage() {
   }
 
   return (
-    <ProtectedRoute>
+    <>
       <main className="bg-[#0E0F1A] min-h-screen">
         <div className="section-container">
           {/* Dark Header Section - matching Dashboard Summary */}
@@ -267,6 +266,6 @@ export default function LogPage() {
           </section>
         </div>
       </main>
-    </ProtectedRoute>
+    </>
   )
 }
